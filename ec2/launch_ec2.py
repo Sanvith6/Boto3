@@ -1,4 +1,4 @@
-import boto3
+import boto3 
 # Open Management Console
 aws_management_console = boto3.session.Session(profile_name="default")
 # Open EC2 Console
