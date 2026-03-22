@@ -1,13 +1,33 @@
 import boto3
 from botocore.exceptions import ClientError
 
-aws_management_console = boto3.session.Session(profile_name="default")
-rds_console = aws_management_console.client(service_name="rds")
 
-try:
-    paginator = rds_console.get_paginator("describe_db_instances")
-    for page in paginator.paginate():
-        for instance in page.get("DBInstances", []):
-            print(instance["DBInstanceIdentifier"])
-except ClientError as error:
-    print(f"Unable to list RDS instances: {error}")
+def list_rds_instances():
+    rds_console = boto3.client("rds")
+    response = rds_console.describe_db_instances()
+
+    instances = []
+    for instance in response.get("DBInstances", []):
+        instances.append(
+            {
+                "db_instance_identifier": instance["DBInstanceIdentifier"],
+                "engine": instance["Engine"],
+                "db_instance_status": instance["DBInstanceStatus"],
+                "db_instance_class": instance["DBInstanceClass"],
+            }
+        )
+
+    return {
+        "message": "RDS instances fetched successfully",
+        "count": len(instances),
+        "instances": instances,
+    }
+
+
+if __name__ == "__main__":
+    try:
+        response = list_rds_instances()
+        print("RDS instances listed successfully")
+        print(response)
+    except ClientError as error:
+        print(f"Unable to list RDS instances: {error}")

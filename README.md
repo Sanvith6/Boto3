@@ -1,75 +1,211 @@
 # Boto3 Learning Project
 
-This repository contains small Python scripts for practicing AWS automation with `boto3`. The examples now cover:
+This repository is a hands-on AWS learning project built with Python and `boto3`. It contains small service-based examples for working with IAM, EC2, S3, Lambda, and RDS.
 
-- IAM user listing and deletion
-- EC2 instance management
-- S3 bucket listing and deletion
-- Lambda function listing and deletion
-- RDS instance listing and deletion
+The goal of the project is to help you understand how AWS resources are created, listed, updated, and deleted from Python code.
 
-The code is written as simple learning exercises, so several scripts use hardcoded values such as the AWS profile name, AMI ID, and EC2 instance ID.
+## Services Covered
+
+- IAM user operations
+- EC2 instance operations
+- S3 bucket operations
+- Lambda function operations
+- RDS instance operations
+
+## Project Structure
+
+### `iam/`
+IAM examples for learning user management and basic API access.
+
+Files:
+- `create_iam_user.py` - create an IAM user
+- `delete_iam_user.py` - delete an IAM user
+- `iamapi.py` - list IAM users with the IAM client
+- `console_management.py` - simple management-console style client setup example
+- `resouce-client.py` - resource/client learning example
+
+### `ec2/`
+EC2 examples for launching and managing instances.
+
+Files:
+- `launch_ec2.py` - launch an EC2 instance
+- `describe_instances.py` - list instance details
+- `start_ec2.py` - start an EC2 instance
+- `stop_ec2.py` - stop an EC2 instance
+- `terminate_ec2.py` - terminate an EC2 instance
+
+### `s3/`
+S3 examples for bucket management.
+
+Files:
+- `create_s3_bucket.py` - create an S3 bucket
+- `list_s3_buckets.py` - list S3 buckets
+- `delete_s3_bucket.py` - delete an S3 bucket
+
+### `lambda/`
+Lambda examples written in a cleaner application style.
+
+Files:
+- `app.py` - main Lambda entrypoint that routes create, delete, and list actions
+- `create_function.py` - create an AWS Lambda function
+- `delete_function.py` - delete an AWS Lambda function
+- `list_functions.py` - list AWS Lambda functions
+
+### `rds/`
+RDS examples for creating, deleting, and listing DB instances.
+
+Files:
+- `create_rds_instance.py` - create an RDS DB instance
+- `delete_rds_instance.py` - delete an RDS DB instance
+- `list_rds_instances.py` - list RDS DB instances
 
 ## Requirements
 
-- Python 3
+- Python 3.10+
 - `boto3`
-- AWS credentials configured locally
-- An AWS CLI profile named `default` for scripts that use `boto3.session.Session(profile_name="default")`
+- AWS account with permission to use IAM, EC2, S3, Lambda, and RDS
+- AWS credentials configured locally with AWS CLI, environment variables, or an IAM role
 
-Install boto3 with:
+Install dependencies:
 
 ```bash
 pip install boto3
 ```
 
-## Project Structure
+## AWS Configuration
 
-- `iam/`  
-  Contains IAM learning scripts:
-  `boto3_test.py`, `console_management.py`, `iamapi.py`, `delete_iam_user.py`, and `resouce-client.py`
+You can configure AWS access in one of these ways:
 
-- `ec2/`  
-  Contains EC2 learning scripts:
-  `describe_instances.py`, `launch_ec2.py`, `start_ec2.py`, `stop_ec2.py`, and `terminate_ec2.py`
+1. AWS CLI credentials
+2. Environment variables
+3. IAM role when running inside AWS
 
-- `s3/`  
-  Contains S3 learning scripts:
-  `list_s3_buckets.py` and `delete_s3_bucket.py`
+Common AWS CLI setup:
 
-- `lambda/`  
-  Contains Lambda learning scripts:
-  `list_lambda_functions.py` and `delete_lambda_function.py`
+```bash
+aws configure
+```
 
-- `rds/`  
-  Contains RDS learning scripts:
-  `list_rds_instances.py` and `delete_rds_instance.py`
+Example environment variables:
+
+```bash
+set AWS_ACCESS_KEY_ID=your_access_key
+set AWS_SECRET_ACCESS_KEY=your_secret_key
+set AWS_DEFAULT_REGION=ap-south-1
+```
 
 ## How To Run
 
-Run any script directly with Python:
+Run any script directly with Python from the project root.
+
+Examples:
 
 ```bash
-python iam/iamapi.py
-python ec2/describe_instances.py
+python iam/create_iam_user.py
 python ec2/launch_ec2.py
-python s3/list_s3_buckets.py
-python lambda/list_lambda_functions.py
-python rds/list_rds_instances.py
+python s3/create_s3_bucket.py
+python lambda/create_function.py
+python rds/create_rds_instance.py
 ```
+
+## Lambda Application Flow
+
+The `lambda/` folder contains both direct boto3 scripts and a deployable Lambda entrypoint.
+
+### Main entrypoint
+
+`lambda/app.py` exposes:
+
+```python
+lambda_handler(event, context)
+```
+
+It reads an `action` value from the event and routes to:
+- `create_function`
+- `delete_function`
+- `list_functions`
+
+### Example Lambda events
+
+Create function:
+
+```json
+{
+  "action": "create",
+  "function_name": "orders-service",
+  "role_arn": "arn:aws:iam::123456789012:role/orders-lambda-role",
+  "python_file_name": "app.py",
+  "zip_file_path": "orders-service.zip",
+  "runtime": "python3.12",
+  "timeout": 30,
+  "memory_size": 128
+}
+```
+
+Delete function:
+
+```json
+{
+  "action": "delete",
+  "function_name": "orders-service"
+}
+```
+
+List functions:
+
+```json
+{
+  "action": "list"
+}
+```
+
+If you deploy the Lambda application in AWS, use this handler value:
+
+```text
+app.lambda_handler
+```
+
+## Code Style In This Project
+
+This repository uses two learning styles:
+
+- Simple script-style examples in folders like `ec2/`, `iam/`, and `s3/`
+- Cleaner production-learning examples in `lambda/` and `rds/`
+
+The newer Lambda and RDS files include:
+- input validation
+- clearer return values
+- realistic example names
+- better structure for reuse
 
 ## Important Notes
 
-- Review all hardcoded AWS values before running scripts that delete or modify AWS resources.
-- Launching, starting, stopping, terminating, or deleting AWS resources can affect billing and availability.
-- `s3/delete_s3_bucket.py` only works on an empty bucket.
-- `rds/delete_rds_instance.py` uses `SkipFinalSnapshot=True`, which permanently removes the DB instance without creating a final snapshot.
-- `iam/console_management.py` imports `boto3_test.py`, so running it depends on that file being present in the same folder.
-- This repository is best treated as a practice sandbox rather than production-ready automation.
+- Some files still contain placeholder values that must be replaced before running.
+- Creating EC2, Lambda, RDS, and other AWS resources may incur AWS charges.
+- `rds/delete_rds_instance.py` deletes the DB instance with `SkipFinalSnapshot=True`.
+- `s3/delete_s3_bucket.py` works only when the bucket is empty unless additional object deletion logic is added.
+- `lambda/create_function.py` expects the deployment zip to contain the Python file named in `python_file_name`.
+- `resouce-client.py` contains a spelling mistake in the filename, but it is kept as-is to match the current project.
 
-## Suggested Improvements
+## Learning Outcomes
 
-- Move hardcoded instance IDs and AMI IDs into variables or environment variables.
-- Add region configuration to each script.
-- Add error handling for missing credentials and failed AWS API calls.
-- Rename `resouce-client.py` to `resource-client.py` for clarity.
+By working through this project, you can learn:
+- how to authenticate AWS access with boto3
+- how to create AWS service clients
+- how to call AWS APIs from Python
+- how to structure simple AWS automation scripts
+- how to move from script-style code toward cleaner reusable code
+
+## Suggested Next Improvements
+
+- Add region configuration to every file
+- Add `.env` or environment-based configuration
+- Add request validation helpers shared across services
+- Add tagging support for EC2, Lambda, and RDS resources
+- Add exception handling for missing credentials and permissions
+- Add unit tests with mocked boto3 clients
+- Rename `resouce-client.py` to `resource-client.py`
+
+## License
+
+This project is distributed under the license included in [`LICENSE`](LICENSE).
