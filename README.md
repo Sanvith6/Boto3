@@ -1,4 +1,4 @@
-# Boto3 Learning Project
+# Boto3 Learning Project 
 
 This repository is a hands-on AWS learning project built with Python and `boto3`. It contains small service-based examples for working with IAM, EC2, S3, Lambda, and RDS.
 
